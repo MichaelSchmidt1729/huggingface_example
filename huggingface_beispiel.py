@@ -7,9 +7,9 @@ Original file is located at
     https://colab.research.google.com/drive/1heKGh3_0uRhKpQOyl5SQIypSggPx7nnf
 """
 
-!pip install transformers
-!pip install huggingface_hub
-!pip install accelerate
+#pip install transformers
+#pip install huggingface_hub
+#pip install accelerate
 
 import torch
 from transformers import pipeline
