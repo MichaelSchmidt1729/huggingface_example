@@ -1,24 +1,22 @@
-import torch
-from transformers import pipeline
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
 
-summarizer = pipeline('summarization')
+tokenizer = AutoTokenizer.from_pretrained("Mr-Vicky-01/Bart-Finetuned-conversational-summarization")
+model = AutoModelForSeq2SeqLM.from_pretrained("Mr-Vicky-01/Bart-Finetuned-conversational-summarization")
 
-wikipedia_text = """Die Triodos Bank N.V. ist eine Aktiengesellschaft niederländischen Rechts mit Hauptsitz in Zeist, Niederlande.[5] Sie umfasst Zweigniederlassungen und Repräsentanzen in sechs europäischen Ländern,[4] sowie die Tochterunternehmen Triodos Investment Management und Triodos Private Banking.[6] Zusammen bietet die Triodos Gruppe ein breites Spektrum an Dienstleistungen an: Bankdienstleistungen, Fondsmanagement, Projektentwicklung, Depotgeschäft, Beteiligungskapital, Unternehmensfinanzierung und Private Banking.[7][8]
-Zum 31. Dezember 2015 betrug das Geschäftsvolumen der Triodos Bankengruppe rund 12,3 Milliarden Euro,[4] sie vergab über 44.000 (2015) Kredite[4] und betreute in Europa über 700.000 Kundenkonten.[4]
+def generate_summary(text):
+    inputs = tokenizer([text], max_length=1024, return_tensors='pt', truncation=True)
+    summary_ids = model.generate(inputs['input_ids'], max_new_tokens=100, do_sample=False)
+    summary = tokenizer.decode(summary_ids[0], skip_special_tokens=True)
+    return summary
+
+text_to_summarize = """
+The Biological Cosmic Ray Experiment (BIOCORE) was a lunar science experiment, that flew on board Command module America as part of Apollo 17.[1] The goal of the BIOCORE experiment was to explore whether or not high energy cosmic rays produced visibly identifiable trauma to brain and eye tissues.[2][3][4]
+
+Background
+During the Apollo 11 mission, Buzz Aldrin and Neil Armstrong reported observing flashes of light whenever they had their eyes closed or when the inside of their spacecraft was dimly lit.[3][5] Every Apollo mission subsequently reported the exact same phenomenon.[5] It was surmised that the cause of these light emissions were the result of heavy-ion cosmic rays interacting with the light detecting cells in the retina of a human eye.[3] This led scientists to question whether or not such heavy cosmic rays might cause damage to the tissues that form the eye, brain and other organs as they transit through a human body.[3]
+
+To assess this, mice with plastic dosimeters surgically implanted under their scalps were flown aboard Apollo 17. The aim for the experiment was to assess whether any microscopic lesions could be visibly identified within the brain, eye and other organ tissues of the mice and whether they could be attributed to high-energy cosmic rays.[2]
+
 """
-result = summarizer(wikipedia_text, max_length=150, min_length=30)
-
-result[0]["summary_text"]
-
-sentiment = pipeline('sentiment-analysis')
-
-text = ('I loved it', 'I hated the service','Es war so lala')
-sentiment_result = sentiment(text)
-
-for r, t in zip(sentiment_result, text):
-  print(t, '-->', r['label'])
-
-translator = pipeline('translation', model="Helsinki-NLP/opus-mt-en-fr")
-
-translator(result[0]['summary_text '])
-
+summary = generate_summary(text_to_summarize)
+print(summary)
